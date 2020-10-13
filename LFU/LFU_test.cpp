@@ -126,4 +126,6 @@ TEST(LFU_cache, complete_test) {
         ASSERT_FALSE(cache.LookUp(elem));
         ASSERT_EQ(cache.GetItemsNumInCache(), cache_size);
     }
+
+    ASSERT_EQ(cache.GetSmallestFrequency(), 1);
 }
