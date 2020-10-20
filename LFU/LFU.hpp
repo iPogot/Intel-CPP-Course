@@ -7,25 +7,48 @@
 
 
 namespace LFU{
-    template <typename el_t> class LFU_Cache {
+    template <typename data, typename id = int> class LFU_Cache {
 
         public:
             
             LFU_Cache(size_t cache_size) {
                 size_ = cache_size;
-                num_of_elem_ = 0;
+                num_of_key_ = 0;
                 min_freq_ = 1;
             }
+            
+            int InsertData(const id key, const data elem) {
 
-            int LookUp(const el_t element) {
+                if(key_to_freq_.find(key) == key_to_freq_.end()) {
+                    return -1;
+                } else {
+                    lfu_data_.insert({key, elem});
+                }
+                    
+                return 0;
+            }
+
+            int GetData(const id key, data& elem) {
+
+                if(lfu_data_.find(key) == lfu_data_.end()) {
+                    return -1;
+                } else {
+                    elem = lfu_data_[key];
+                }
+
+                return 0;
+            }
+
+            int LookUp(const id key) {
                 
-                if(elem_to_freq_.find(element) == elem_to_freq_.end()) {
+                if(key_to_freq_.find(key) == key_to_freq_.end()) {
                     if(!IsFull()) {
-                        InsertElement(element, 1);
+                        InsertKey(key, 1);
                     } else {
-                        el_t del_elem = freq_to_elem_[min_freq_].front();
-                        DeleteElement(del_elem, min_freq_);
-                        InsertElement(element, 1);
+                        id del_key = freq_to_key_[min_freq_].front();
+                        DeleteKey(del_key, min_freq_);
+                        InsertKey(key, 1);
+                        lfu_data_.erase(del_key);
                     }
 
                     if(min_freq_ != 1) {
@@ -34,7 +57,7 @@ namespace LFU{
 
                     return 0;
                 } else {
-                    IncreaseFrequency(element);
+                    IncreaseFrequency(key);
                     return 1;
                 }
 
@@ -54,67 +77,67 @@ namespace LFU{
 
             size_t GetItemsNumInCache() const {
 
-                return num_of_elem_;
+                return num_of_key_;
 
             }
 
         private:
             int IsFull() const {
-                if (num_of_elem_ == size_) {
+                if (num_of_key_ == size_) {
                     return 1;
                 } else {
                     return 0;
                 } 
             }
 
-            void IncreaseFrequency(const el_t element) {
+            void IncreaseFrequency(const id key) {
 
-                size_t frequency = elem_to_freq_[element];
-                DeleteElement(element, elem_to_freq_[element]);
+                size_t frequency = key_to_freq_[key];
+                DeleteKey(key, key_to_freq_[key]);
 
-                if(!num_of_elem_) {
+                if(!num_of_key_) {
                     min_freq_++;
                 }
 
-                InsertElement(element, frequency + 1);
+                InsertKey(key, frequency + 1);
 
             }
 
-            void InsertElement(const el_t element, const size_t frequency) {
-                elem_to_freq_.insert({element, frequency});
-                if(freq_to_elem_.find(frequency) == freq_to_elem_.end()) {
-                    std::list<el_t> elem_list;
-                    elem_list.push_back(element);
-                    freq_to_elem_.insert({frequency, elem_list});
+            void InsertKey(const id key, const size_t frequency) {
+                key_to_freq_.insert({key, frequency});
+                if(freq_to_key_.find(frequency) == freq_to_key_.end()) {
+                    std::list<id> elem_list;
+                    elem_list.push_back(key);
+                    freq_to_key_.insert({frequency, elem_list});
                 } else {
-                    freq_to_elem_[frequency].push_back(element);
+                    freq_to_key_[frequency].push_back(key);
                 }   
-                num_of_elem_++;
+                num_of_key_++;
             }
 
-            void DeleteElement(const el_t element, const size_t frequency) {
-                elem_to_freq_.erase(element);
-                freq_to_elem_[frequency].remove(element);
-                
+            void DeleteKey(const id key, const size_t frequency) {
+                key_to_freq_.erase(key);
+                freq_to_key_[frequency].remove(key);
 
-
-                if(freq_to_elem_[frequency].empty()) {
-                    freq_to_elem_.erase(frequency);
+                if(freq_to_key_[frequency].empty()) {
+                    freq_to_key_.erase(frequency);
 
                     if(min_freq_ == frequency) {
                         min_freq_++;
                     }
 
                 }
-                num_of_elem_--;
+                num_of_key_--;
 
             }
+            
 
-            size_t num_of_elem_;
+            size_t num_of_key_;
             size_t size_;
             size_t min_freq_;
-            std::unordered_map<size_t, std::list<el_t>> freq_to_elem_;
-            std::unordered_map<el_t, size_t> elem_to_freq_;
+            std::unordered_map<size_t, std::list<id>> freq_to_key_;
+            std::unordered_map<id, size_t> key_to_freq_;
+            std::unordered_map<id, data> lfu_data_;
 
     };
 

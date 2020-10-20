@@ -5,7 +5,7 @@ const size_t cache_size = 25;
 
 TEST(LFU_cache, initialization) {
     
-    LFU::LFU_Cache<int> cache(cache_size);
+    LFU::LFU_Cache<int, int> cache(cache_size);
 
     ASSERT_EQ(cache.GetSmallestFrequency(), 1);
     ASSERT_EQ(cache.GetCacheSize(), cache_size);
@@ -15,10 +15,14 @@ TEST(LFU_cache, initialization) {
 
 TEST(LFU_cache, full_cache_test) {
     
-    LFU::LFU_Cache<int> cache(cache_size);
-
+    LFU::LFU_Cache<int, int> cache(cache_size);
+    int data;
     for(int i = 1; i <= cache_size; i++) {
         ASSERT_FALSE(cache.LookUp(i));
+        ASSERT_EQ(cache.InsertData(i, i), 0);
+        ASSERT_EQ(cache.GetData(i, data), 0);
+        ASSERT_EQ(data, i);
+
         ASSERT_EQ(cache.GetSmallestFrequency(), 1);
         ASSERT_EQ(cache.GetItemsNumInCache(), i);
     }
@@ -27,10 +31,14 @@ TEST(LFU_cache, full_cache_test) {
 
 TEST(LFU_cache, cache_overflow_test) {
     
-    LFU::LFU_Cache<int> cache(cache_size);
-
+    LFU::LFU_Cache<int, int> cache(cache_size);
+    int data;
     for(int i = 1; i <= 100; i++) {
         ASSERT_FALSE(cache.LookUp(i));
+        ASSERT_EQ(cache.InsertData(i, i), 0);
+        ASSERT_EQ(cache.GetData(i, data), 0);
+        ASSERT_EQ(data, i);
+
         ASSERT_EQ(cache.GetSmallestFrequency(), 1);
         if(i <= cache_size) {
             ASSERT_EQ(cache.GetItemsNumInCache(), i);
@@ -43,17 +51,26 @@ TEST(LFU_cache, cache_overflow_test) {
 
 TEST(LFU_cache, check_frequency_increase) {
     
-    LFU::LFU_Cache<int> cache(cache_size);
-
+    LFU::LFU_Cache<int, int> cache(cache_size);
+    int data;
     for(int k = 1; k <= 10; k++) {
         for(int i = 1; i <= cache_size; i++) {
             if(k == 1) {
+            
                 ASSERT_EQ(cache.GetSmallestFrequency(), k);
                 ASSERT_FALSE(cache.LookUp(i));
+                ASSERT_EQ(cache.InsertData(i, i), 0);
+                ASSERT_EQ(cache.GetData(i, data), 0);
+                ASSERT_EQ(data, i);
                 ASSERT_EQ(cache.GetItemsNumInCache(), i);
+            
             } else {
-
+                
                 ASSERT_TRUE(cache.LookUp(i));
+                ASSERT_EQ(cache.InsertData(i, i), 0);
+                ASSERT_EQ(cache.GetData(i, data), 0);
+                ASSERT_EQ(data, i);
+
                 ASSERT_EQ(cache.GetItemsNumInCache(), 25);
                 if(i == cache_size) {
                     ASSERT_EQ(cache.GetSmallestFrequency(), k);
@@ -69,11 +86,12 @@ TEST(LFU_cache, check_frequency_increase) {
 }
 
 TEST(LFU_cache, complete_test) {
-    LFU::LFU_Cache<int> cache(cache_size);
+    LFU::LFU_Cache<int, int> cache(cache_size);
     size_t cnt = cache_size / 3;
     int elem = 1;
     size_t i_lim = 0;
 
+    int data;
     for(int k = 1; k <= cnt; k++) {
         if(k != cnt) {
             i_lim = k * 3;
@@ -85,9 +103,15 @@ TEST(LFU_cache, complete_test) {
             for(int elem = (k - 1) * 3 + 1; elem <= i_lim; elem++) { 
                 if(repeat == 1) {
                     ASSERT_FALSE(cache.LookUp(elem));
+                    ASSERT_EQ(cache.InsertData(elem, elem), 0);
+                    ASSERT_EQ(cache.GetData(elem, data), 0);
+                    ASSERT_EQ(data, elem);
                     ASSERT_EQ(cache.GetItemsNumInCache(), elem);
                 } else {
                     ASSERT_TRUE(cache.LookUp(elem));
+                    ASSERT_EQ(cache.InsertData(elem, elem), 0);
+                    ASSERT_EQ(cache.GetData(elem, data), 0);
+                    ASSERT_EQ(data, elem);
                     ASSERT_EQ(cache.GetItemsNumInCache(), i_lim);
                 }
                 ASSERT_EQ(cache.GetSmallestFrequency(), 1);
@@ -111,6 +135,9 @@ TEST(LFU_cache, complete_test) {
         for(int repeat = k; repeat <= cnt; repeat++) {
             for(int elem = (k - 1) * 3 + 1; elem <= i_lim; elem++) {
                 ASSERT_TRUE(cache.LookUp(elem));
+                ASSERT_EQ(cache.InsertData(elem, elem), 0);
+                ASSERT_EQ(cache.GetData(elem, data), 0);
+                ASSERT_EQ(data, elem);
                 ASSERT_EQ(cache.GetItemsNumInCache(), cache_size);
             }
             if(repeat == k) {
@@ -124,6 +151,9 @@ TEST(LFU_cache, complete_test) {
 
     for(int elem = cache_size + 1; elem <= 2 * cache_size; elem++) {
         ASSERT_FALSE(cache.LookUp(elem));
+        ASSERT_EQ(cache.InsertData(elem, elem), 0);
+        ASSERT_EQ(cache.GetData(elem, data), 0);
+        ASSERT_EQ(data, elem);
         ASSERT_EQ(cache.GetItemsNumInCache(), cache_size);
     }
 
