@@ -5,4 +5,4 @@
 
 ## To compile project and run end-to-end test use the following coomand
 ##### cd testing
-##### ./run.sh <input.dat> <output.dat> <answear.ans>
+##### ./run.sh <input.dat> <output.ans> <answear.ans>
