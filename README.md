@@ -1,8 +1,8 @@
 # Intel-CPP-Course
 
 ## To compile project use the following coomand
-### make
+##### make
 
 ## To compile project and run end-to-end test use the following coomand
-### cd testing
-### ./run.sh <input.dat> <output.dat> <answear.ans>
+##### cd testing
+##### ./run.sh <input.dat> <output.dat> <answear.ans>
