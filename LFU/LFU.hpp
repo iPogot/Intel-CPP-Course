@@ -11,11 +11,10 @@ namespace LFU{
 
         public:
             
-            LFU_Cache(size_t cache_size) {
-                size_ = cache_size;
-                num_of_key_ = 0;
-                min_freq_ = 1;
-            }
+            LFU_Cache(size_t cache_size)
+                :size_(cache_size) {}
+                
+            
             
             int InsertData(const id key, const data elem) {
 
@@ -28,7 +27,7 @@ namespace LFU{
                 return 0;
             }
 
-            int GetData(const id key, data& elem) {
+        int GetData(const id key, data& elem) {
 
                 if(lfu_data_.find(key) == lfu_data_.end()) {
                     return -1;
@@ -39,11 +38,12 @@ namespace LFU{
                 return 0;
             }
 
-            int LookUp(const id key) {
+            bool LookUp(const id key) {
                 
                 if(key_to_freq_.find(key) == key_to_freq_.end()) {
                     if(!IsFull()) {
                         InsertKey(key, 1);
+                        
                     } else {
                         id del_key = freq_to_key_[min_freq_].front();
                         DeleteKey(del_key, min_freq_);
@@ -55,10 +55,10 @@ namespace LFU{
                         min_freq_ = 1;
                     }
 
-                    return 0;
+                    return false;
                 } else {
                     IncreaseFrequency(key);
-                    return 1;
+                    return true;
                 }
 
             }
@@ -82,12 +82,8 @@ namespace LFU{
             }
 
         private:
-            int IsFull() const {
-                if (num_of_key_ == size_) {
-                    return 1;
-                } else {
-                    return 0;
-                } 
+            bool IsFull() const {
+                return (num_of_key_ == size_);
             }
 
             void IncreaseFrequency(const id key) {
@@ -109,15 +105,25 @@ namespace LFU{
                     std::list<id> elem_list;
                     elem_list.push_back(key);
                     freq_to_key_.insert({frequency, elem_list});
+                    
+                    key_position_.insert({key, --freq_to_key_[frequency].end()});
+                    
                 } else {
+
                     freq_to_key_[frequency].push_back(key);
+                    key_position_[key] = --freq_to_key_[frequency].end();
+
+                    
                 }   
+                
                 num_of_key_++;
             }
 
             void DeleteKey(const id key, const size_t frequency) {
                 key_to_freq_.erase(key);
-                freq_to_key_[frequency].remove(key);
+                
+                freq_to_key_[frequency].erase(key_position_[key]);
+                key_position_.erase(key);
 
                 if(freq_to_key_[frequency].empty()) {
                     freq_to_key_.erase(frequency);
@@ -127,15 +133,17 @@ namespace LFU{
                     }
 
                 }
+
                 num_of_key_--;
 
             }
-            
+            using list_iter = typename std::list<id>::iterator;
 
-            size_t num_of_key_;
+            size_t num_of_key_ = 0;
             size_t size_;
-            size_t min_freq_;
+            size_t min_freq_ = 1;
             std::unordered_map<size_t, std::list<id>> freq_to_key_;
+            std::unordered_map<size_t, list_iter> key_position_;
             std::unordered_map<id, size_t> key_to_freq_;
             std::unordered_map<id, data> lfu_data_;
 
