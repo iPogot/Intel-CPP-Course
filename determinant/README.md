@@ -8,11 +8,11 @@
 
 ## To run ETE test:
 #### cd ./tests
-#### ./run.sh rf <input> <output> <answear>
+#### ./run.sh rf "input" "output" "answear"
   
 ## To run with input from file:
 #### cd ./tests
-#### ./run.sh rs <input>
+#### ./run.sh rs "input"
 
 ## To run gtest:
 #### cd ./tests
