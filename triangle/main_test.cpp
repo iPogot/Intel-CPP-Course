@@ -5,34 +5,42 @@
 
 
 int main() {
+    
+    size_t tr_cnt = 0;
+    size_t total_cnt_num = 0;
+
     double num = 0;
-    size_t num_cnt = 1;
+    size_t num_cnt = 0;
     
     std::vector<double> num_array;
     std::vector<triangle::Point> point_array;
     std::vector<triangle::Triangle> triangle_array;
-    auto ret = scanf("%lf", &num);  //skip first number
-    ret = scanf("%lf", &num); 
-
+    auto ret = scanf("%zu", &total_cnt_num);                  //skip first number
+    //total_cnt_num = 2;
     double x, y, z;
     triangle::Point p1, p2, p3;
 
-    
-    while(ret > 0) {
+    while(tr_cnt < total_cnt_num) {
+
+        ret = scanf("%lf", &num);
 
         num_array.emplace_back(num);
+        num_cnt++;
 
         if(num_cnt % 3 == 0) {
 
+            x = num_array[0];
+            y = num_array[1];
+            z = num_array[2];
+
+            num_array.pop_back();
+            num_array.pop_back();
+            num_array.pop_back();
+            point_array.emplace_back(triangle::Point(x, y, z));
+
             if(num_cnt == 9) {
-            
-                x = num_array[0];
-                y = num_array[1];
-                z = num_array[2];
-                num_array.pop_back();
-                num_array.pop_back();
-                num_array.pop_back();
-                point_array.emplace_back(triangle::Point(x, y, z));
+                
+                tr_cnt++;
 
                 p1 = point_array[0];
                 p2 = point_array[1];
@@ -41,24 +49,13 @@ int main() {
                 point_array.pop_back();
                 point_array.pop_back();
                 triangle_array.emplace_back(triangle::Triangle(p1, p2, p3));
+                
                 num_cnt = 0; 
             
-            } else {
-                
-                x = num_array[0];
-                y = num_array[1];
-                z = num_array[2];
-                num_array.pop_back();
-                num_array.pop_back();
-                num_array.pop_back();
-                point_array.emplace_back(triangle::Point(x, y, z));
-
             }
-        
+
         } 
 
-        ret = scanf("%lf", &num);
-        num_cnt++;
     }
     
     
@@ -78,23 +75,6 @@ int main() {
                     }
                 }
 
-            } else {
-
-                std::cout<<"Incorect triangle"<<std::endl;
-
-                if( !triangle_array[i].get_plane().iscorrect() ) {
-
-                    triangle_array[i].print_triangle_info();
-
-                }
-
-                if( !triangle_array[j].get_plane().iscorrect() ) {
-
-                    triangle_array[j].print_triangle_info();
-
-                }
-                
-
             }
             
         }
@@ -102,7 +82,7 @@ int main() {
 
     for(auto it = inter_tr.begin(); it != inter_tr.end(); it++) {
 
-        std::cout<<it->first<<std::endl;
+        std::cout<<it->first + 1<<std::endl;
 
     }
 
